@@ -126,6 +126,12 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# data
+*.csv
+
+# log
+tensorboard_log/
+
 # Pyre type checker
 .pyre/
 test_new.py
