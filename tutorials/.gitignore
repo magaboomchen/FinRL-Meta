@@ -7,3 +7,4 @@ tmp.py
 # Data
 *.png
 *.pickle
+trained_models/
