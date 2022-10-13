@@ -1,0 +1,9 @@
+# Temporal
+tmp.py
+
+# Personal
+*.json
+
+# Data
+*.png
+*.pickle
