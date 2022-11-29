@@ -35,6 +35,41 @@ class TusharePrivate(Tushare):
         df = pro.index_weight(index_code=index_code, start_date=start_date, end_date=end_date)
         return df["con_code"]
 
+    def add_turbulence(self):
+        """
+        add turbulence index from a precalcualted dataframe
+        :param data: (df) pandas dataframe
+        :return: (df) pandas dataframe
+        """
+        # df = data.copy()
+        # turbulence_index = self.calculate_turbulence(df)
+        # df = df.merge(turbulence_index, on="time")
+        # df = df.sort_values(["time", "tic"]).reset_index(drop=True)
+        # return df
+        if self.data_source in [
+            "binance",
+            "ccxt",
+            "iexcloud",
+            "joinquant",
+            "quantconnect",
+        ]:
+            print(
+                f"Turbulence not supported for {self.data_source} yet. Return original DataFrame."
+            )
+        if self.data_source in [
+            "alpaca",
+            "ricequant",
+            "tushare",
+            "wrds",
+            "yahoofinance",
+        ]:
+            turbulence_index = self.calculate_turbulence()
+            self.dataframe = self.dataframe.merge(turbulence_index, on="time")
+            rt = self.dataframe.sort_values(["time", "tic"], inplace=True)
+            self.dataframe.reset_index(
+                drop=True, inplace=True
+            )
+
 TICKET_TYPE_INDEX = "TICKET_TYPE_INDEX"
 TICKET_TYPE_TICKET = "TICKET_TYPE_TICKET"
 
