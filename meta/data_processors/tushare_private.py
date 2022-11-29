@@ -1,19 +1,39 @@
-import importlib
 import datetime
-from datetime import timedelta
+import importlib
+import warnings
 from typing import Union
 
 import pandas as pd
-from matplotlib import pyplot as plt
 import tushare as ts
+from matplotlib import pyplot as plt
 
 import meta
-from meta.data_processors.tushare import ReturnPlotter
+from meta.data_processors.tushare import ReturnPlotter, Tushare
+from meta.local.base.list_lib import get_common_length_list
 from meta.local.base.setting_loader import SettingLoader
+
+importlib.reload(meta.local.base.list_lib)
+warnings.filterwarnings("ignore")
+
 tushare_setting = SettingLoader.load_tushare_setting()
 tushare_token = tushare_setting['tushare_token']
-from meta.local.base.list_lib import get_common_length_list
-importlib.reload(meta.local.base.list_lib)
+
+class TusharePrivate(Tushare):
+    def __init__(
+        self,
+        data_source: str,
+        start_date: str,
+        end_date: str,
+        time_interval: str,
+        **kwargs,
+    ):
+        super().__init__(data_source, start_date, end_date, time_interval, **kwargs)
+
+    def get_index_tickets(self, index_code, start_date, end_date) -> pd.DataFrame:
+        pro = ts.pro_api()
+        # df = pro.index_weight(index_code='399300.SZ', start_date='20180901', end_date='20180930')
+        df = pro.index_weight(index_code=index_code, start_date=start_date, end_date=end_date)
+        return df["con_code"]
 
 TICKET_TYPE_INDEX = "TICKET_TYPE_INDEX"
 TICKET_TYPE_TICKET = "TICKET_TYPE_TICKET"
