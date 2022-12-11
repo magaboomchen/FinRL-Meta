@@ -38,7 +38,7 @@ class TusharePrivate(Tushare):
     def add_turbulence(self):
         """
         add turbulence index from a precalcualted dataframe
-        :param data: (df) pandas dataframe
+        :param data: (df) pandas dataframe 
         :return: (df) pandas dataframe
         """
         # df = data.copy()
@@ -102,7 +102,12 @@ class ReturnPlotterPrivate(ReturnPlotter):
         df.loc[:, "dt"] = df.index
         df.index = range(len(df))
         df.sort_values(axis=0, by="dt", ascending=True, inplace=True)
-        df["date"] = pd.to_datetime(df["dt"], format="%Y-%m-%d")
+        if 'date' in df:
+            df["date"] = pd.to_datetime(df["dt"], format="%Y-%m-%d")
+        elif 'trade_date' in df:
+            df["trade_date"] = pd.to_datetime(df["dt"], format="%Y-%m-%d")
+        else:
+            raise ValueError(f"Unknown date key words in {self.trade.volumns}")
         return df
 
     def plot(self, baseline_ticket:str=None, figure_filepath:str=None,
@@ -125,10 +130,20 @@ class ReturnPlotterPrivate(ReturnPlotter):
             baseline_label = tic2label.get(baseline_ticket, baseline_ticket)
         else:
             # 均等权重
-            all_date = self.trade.date.unique().tolist()
+            if 'date' in self.trade:
+                all_date = self.trade.date.unique().tolist()
+            elif 'trade_date' in self.trade:
+                all_date = self.trade.trade_date.unique().tolist()
+            else:
+                raise ValueError(f"Unknown date key words in {self.trade.volumns}")
             baseline = []
             for day in all_date:
-                day_close = self.trade[self.trade["date"] == day].close.tolist()
+                if 'date' in self.trade:
+                    day_close = self.trade[self.trade["date"] == day].close.tolist()
+                elif 'trade_date' in self.trade:
+                    day_close = self.trade[self.trade["trade_date"] == day].close.tolist()
+                else:
+                    raise ValueError(f"Unknown date key words in {self.trade.volumns}")
                 avg_close = sum(day_close) / len(day_close)
                 baseline.append(avg_close)
 
@@ -141,7 +156,12 @@ class ReturnPlotterPrivate(ReturnPlotter):
             60  # you should scale this variable accroding to the total trading days
         )
         time = list(range(len(ours)))
-        datetimes = self.df_account_value.date.tolist()
+        if 'date' in self.df_account_value:
+            datetimes = self.df_account_value.date.tolist()
+        elif 'trade_date' in self.df_account_value:
+            datetimes = self.df_account_value.trade_date.tolist()
+        else:
+            raise ValueError(f"Unknown date key words in {self.df_account_value.volumns}")
         ticks = [tick for t, tick in zip(time, datetimes) if t % days_per_tick == 0]
         plt.title("Cumulative Returns")
         (ours, baseline) = get_common_length_list(ours, baseline)
